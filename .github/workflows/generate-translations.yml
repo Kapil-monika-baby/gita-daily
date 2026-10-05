@@ -1,0 +1,45 @@
+name: Generate Gita translations
+
+on:
+  workflow_dispatch:
+    inputs:
+      language:
+        description: "Target language code, or all"
+        required: true
+        default: "hi"
+      chapter:
+        description: "Optional chapter number"
+        required: false
+        default: ""
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Configure Google credentials
+        run: |
+          printf '%s' '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > "$RUNNER_TEMP/google-credentials.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/google-credentials.json" >> "$GITHUB_ENV"
+      - name: Generate translations
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GOOGLE_CLOUD_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          GOOGLE_CLOUD_LOCATION: global
+        run: |
+          if [ -n "${{ inputs.chapter }}" ]; then
+            npm run translations:generate -- "${{ inputs.language }}" --chapter="${{ inputs.chapter }}"
+          else
+            npm run translations:generate -- "${{ inputs.language }}"
+          fi
+      - name: Validate generated translations
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npm run translations:validate -- --language="${{ inputs.language }}"

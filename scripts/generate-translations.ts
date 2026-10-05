@@ -17,7 +17,7 @@ const location = process.env.GOOGLE_CLOUD_LOCATION ?? "global";
 if (!supabaseUrl || !serviceKey || !projectId) {
   throw new Error("Required env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, GOOGLE_CLOUD_PROJECT_ID");
 }
-if (language && !targets.includes(language)) {
+if (language && language !== "all" && !targets.includes(language)) {
   throw new Error(`Unsupported language: ${language}. Supported: ${targets.join(", ")}`);
 }
 
@@ -25,7 +25,7 @@ const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession:
 const client = new TranslationServiceClient();
 
 async function main() {
-  const languages = language ? [language] : targets;
+  const languages = !language || language === "all" ? targets : [language];
   let query = supabase
     .from("verse_meanings")
     .select("verse_id,meaning,verses!inner(chapter,verse)")

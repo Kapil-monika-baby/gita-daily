@@ -33,7 +33,7 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: |
           if [ -n "${{ inputs.chapter }}" ]; then
-            python scripts/generate-translations.py "${{ inputs.language }}" --chapter="${{ inputs.chapter }}"
+            python scripts/generate-translations.py "${{ inputs.language || 'hi' }}" --chapter="${{ inputs.chapter }}"
           else
             python scripts/generate-translations.py "${{ inputs.language }}"
           fi

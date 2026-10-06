@@ -2,9 +2,10 @@ name: Generate supported Gita translations
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - ".github/trigger-supported-translations"
+
+concurrency:
+  group: gita-supported-translations
+  cancel-in-progress: false
 
 jobs:
   translate:

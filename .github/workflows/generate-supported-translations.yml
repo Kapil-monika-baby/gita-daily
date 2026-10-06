@@ -26,15 +26,15 @@ jobs:
 
       - name: Import missing English masters
         env:
-          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
         run: python scripts/import-english-masters.py
 
-      - name: Generate all chapters for \${{ matrix.language }}
+      - name: Generate all chapters for ${{ matrix.language }}
         env:
-          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
-        run: python scripts/generate-translations.py "\${{ matrix.language }}"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python scripts/generate-translations.py "${{ matrix.language }}"
 
       - uses: actions/setup-node@v4
         with:
@@ -44,6 +44,6 @@ jobs:
 
       - name: Validate generated translations
         env:
-          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
-        run: npm run translations:validate -- --language="\${{ matrix.language }}"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: npm run translations:validate -- --language="${{ matrix.language }}"

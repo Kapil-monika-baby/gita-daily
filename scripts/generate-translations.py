@@ -15,6 +15,7 @@ import os
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 from datetime import datetime, timezone
 
 import argostranslate.package
@@ -26,9 +27,21 @@ TARGETS = [
 ]
 
 url = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
-key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 if not url or not key:
-    raise SystemExit("Required env: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
+    raise SystemExit("Required env: SUPABASE_URL and SUPABASE_SECRET_KEY")
+
+def key_kind(value):
+    if value.startswith("sb_secret_"):
+        return "secret"
+    if value.startswith("sb_publishable_"):
+        return "publishable"
+    if value.startswith("eyJ"):
+        return "legacy-jwt"
+    return "unknown"
+
+if key_kind(key) == "publishable":
+    raise SystemExit("SUPABASE_SECRET_KEY is a publishable key. GitHub Actions needs a Supabase secret key (sb_secret_...) for translation writes.")
 
 args = [a for a in sys.argv[1:] if a]
 language = next((a for a in args if not a.startswith("--")), "hi")
@@ -52,7 +65,15 @@ def api(method, path, payload=None, params=None):
         },
         data=json.dumps(payload).encode() if payload is not None else None,
     )
-    with urllib.request.urlopen(req, timeout=60) as response:
+    try:
+        response_ctx = urllib.request.urlopen(req, timeout=60)
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode(errors="replace")
+        raise RuntimeError(
+            f"Supabase REST {method} {path} failed with HTTP {exc.code}. "
+            f"Credential type={key_kind(key)}. Response: {body[:500]}"
+        ) from exc
+    with response_ctx as response:
         raw = response.read().decode()
         return json.loads(raw) if raw else []
 

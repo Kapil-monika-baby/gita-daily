@@ -1,0 +1,49 @@
+name: Generate supported Gita translations
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/trigger-supported-translations"
+
+jobs:
+  translate:
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        language: [hi, ur, fr, de, es, pt, it, ru, ja, ko, zh, ar, id, th]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install free offline translation engine
+        run: python -m pip install --upgrade pip && python -m pip install argostranslate
+
+      - name: Import missing English masters
+        env:
+          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python scripts/import-english-masters.py
+
+      - name: Generate all chapters for \${{ matrix.language }}
+        env:
+          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python scripts/generate-translations.py "\${{ matrix.language }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - name: Validate generated translations
+        env:
+          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: \${{ secrets.SUPABASE_SECRET_KEY }}
+        run: npm run translations:validate -- --language="\${{ matrix.language }}"

@@ -47,7 +47,6 @@ def api(method, path, payload=None, params=None):
         method=method,
         headers={
             "apikey": key,
-            "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
             "Prefer": "return=representation",
         },

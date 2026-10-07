@@ -13,7 +13,7 @@ TARGETS = {
     "ml": "mal_Mlym", "pa": "pan_Guru", "or": "ory_Orya",
     "as": "asm_Beng", "ne": "npi_Deva",
 }
-MODEL = "Raghavan/indictrans2-en-indic-dist-200M"
+MODEL = "naklitechie/indictrans2-en-indic-dist-200M"
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")

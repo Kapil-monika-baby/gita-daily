@@ -66,7 +66,7 @@ def main():
         processed = processor.preprocess_batch(texts, src_lang="eng_Latn", tgt_lang=target)
         inputs = tokenizer(processed, padding="longest", truncation=True, return_tensors="pt")
         with torch.no_grad():
-            generated = model.generate(**inputs, max_length=256, num_beams=5, num_return_sequences=1)
+            generated = model.generate(**inputs, max_length=256, num_beams=5, num_return_sequences=1, use_cache=False)
         decoded = tokenizer.batch_decode(generated, skip_special_tokens=True)
         outputs = processor.postprocess_batch(decoded, lang=target)
         for item, meaning in zip(batch, outputs):

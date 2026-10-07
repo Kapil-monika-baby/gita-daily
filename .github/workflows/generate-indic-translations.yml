@@ -8,9 +8,9 @@ on:
         required: true
         default: "mr"
       limit:
-        description: "Optional verse limit for testing"
+        description: "Number of verses to generate (700 = full chapter corpus)"
         required: false
-        default: "5"
+        default: "700"
 
 concurrency:
   group: gita-indic-translations

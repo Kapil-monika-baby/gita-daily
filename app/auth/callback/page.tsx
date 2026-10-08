@@ -14,6 +14,7 @@ export default function AuthCallback() {
     async function finish() {
       const supabase = createClient();
       const params = new URLSearchParams(window.location.search);
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
       const code = params.get("code");
       const tokenHash = params.get("token_hash");
       const type = params.get("type");
@@ -23,9 +24,17 @@ export default function AuthCallback() {
       if (code) {
         ({ error } = await supabase.auth.exchangeCodeForSession(code));
       } else if (tokenHash && type === "email") {
-        ({ error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" }));
+        ({ error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "email",
+        }));
+      } else if (hash.get("access_token") && hash.get("refresh_token")) {
+        ({ error } = await supabase.auth.setSession({
+          access_token: hash.get("access_token")!,
+          refresh_token: hash.get("refresh_token")!,
+        }));
       } else {
-        error = new Error("Missing sign-in code.");
+        error = new Error("Missing sign-in credentials.");
       }
 
       if (cancelled) return;
@@ -41,12 +50,15 @@ export default function AuthCallback() {
         return;
       }
 
+      window.history.replaceState({}, document.title, "/auth/callback");
       router.replace("/");
       router.refresh();
     }
 
     finish();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   return (

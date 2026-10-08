@@ -51,7 +51,7 @@ export default function Home(){
     {languages.map(([code,name])=><option key={code} value={code}>{name}</option>)}
    </select>
    {show&&<div className="meaning"><strong>Meaning</strong><br/>{loadingMeaning?"Loading cached meaning…":translation?.meaning??"A reviewed translation is not available for this language yet."}</div>}
-   <div className="actions"><button className="primary" onClick={()=>setShow(v=>!v)}>{show?"Hide meaning":"Reveal meaning"}</button><button className="secondary">Today’s wallpaper</button></div>
+   <div className="actions"><button className="primary" onClick={()=>setShow(v=>!v)}>{show?"Hide meaning":"Reveal meaning"}</button><a className="secondary" href="/reader">Read all 700 verses</a></div>
    </>}
   </article>
   <aside className="card"><div className="eyebrow">Gita Daily Plus</div><h2>Build a daily practice.</h2><div className="features">

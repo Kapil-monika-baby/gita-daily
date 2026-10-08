@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gita-daily-nine.vercel.app";
+
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -21,7 +23,7 @@ export default function Auth() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${SITE_URL}/auth/callback` },
     });
     if (error) setError(error.message);
     else setSent(true);

@@ -16,6 +16,12 @@ export default function Home(){
  const [userEmail,setUserEmail]=useState<string|null>(null);
 
  useEffect(()=>{
+  const canonical="https://gita-daily-nine.vercel.app";
+  if(window.location.hostname.endsWith(".vercel.app") && window.location.hostname!=="gita-daily-nine.vercel.app"){
+   window.location.replace(canonical+window.location.pathname+window.location.search+window.location.hash);
+   return;
+  }
+
   const supabase=createClient();
   supabase.auth.getUser().then(({data})=>setUserEmail(data.user?.email??null));
   const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{

@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const params = useSearchParams();
   const [message, setMessage] = useState("Signing you in…");
 
   useEffect(() => {
@@ -14,6 +13,7 @@ export default function AuthCallback() {
 
     async function finish() {
       const supabase = createClient();
+      const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
       const tokenHash = params.get("token_hash");
       const type = params.get("type");
@@ -23,10 +23,7 @@ export default function AuthCallback() {
       if (code) {
         ({ error } = await supabase.auth.exchangeCodeForSession(code));
       } else if (tokenHash && type === "email") {
-        ({ error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: "email",
-        }));
+        ({ error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" }));
       } else {
         error = new Error("Missing sign-in code.");
       }
@@ -49,11 +46,8 @@ export default function AuthCallback() {
     }
 
     finish();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [params, router]);
+    return () => { cancelled = true; };
+  }, [router]);
 
   return (
     <main className="shell">

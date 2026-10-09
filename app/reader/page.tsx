@@ -149,8 +149,10 @@ export default function Reader() {
             </div>
             {open === verse.id && (
               <div className="meaning" style={{ marginTop: 18 }}>
-                <strong>Reviewed meaning</strong><br />
-                {loadingMeaning === verse.id ? "Loading…" : meanings[verse.id]}
+                <strong>Meaning</strong><br />
+                {loadingMeaning === verse.id ? "Translating…" : meanings[verse.id]?.text}
+                {meanings[verse.id]?.status === "ai_generated_unverified" && <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>AI-translated · Not yet verified</p>}
+                {meanings[verse.id]?.status === "reviewed" && <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>Reviewed translation</p>}
               </div>
             )}
           </article>

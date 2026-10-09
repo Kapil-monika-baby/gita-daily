@@ -115,7 +115,7 @@ export default function Reader() {
           </label>
           <label>
             <span className="muted">Meaning </span>
-            <select value={language} onChange={e => { setLanguage(e.target.value); setMeanings({}); }} style={{ marginLeft: 6, padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}>
+            <select value={language} onChange={e => { setLanguage(e.target.value); setMeanings({}); setOpen(null); }} style={{ marginLeft: 6, padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}>
               {languages.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
             </select>
           </label>

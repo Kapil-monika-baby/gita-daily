@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+type Meaning = { text: string; status?: string };
+
 type Verse = {
   id: string;
   chapter: number;
@@ -25,7 +27,7 @@ export default function Reader() {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [language, setLanguage] = useState("en");
   const [open, setOpen] = useState<string | null>(null);
-  const [meanings, setMeanings] = useState<Record<string, string>>({});
+  const [meanings, setMeanings] = useState<Record<string, Meaning>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,13 +77,16 @@ export default function Reader() {
         "/api/translation?verseId=" + encodeURIComponent(verse.id) + "&language=" + encodeURIComponent(language)
       );
       const data = await response.json();
-      if (data.error) throw new Error(data.error);
+      if (!response.ok || data.error) throw new Error(data.error || "Unable to load translation");
       setMeanings(prev => ({
         ...prev,
-        [verse.id]: data.translation?.meaning || "A reviewed translation is not available for this language yet.",
+        [verse.id]: {
+          text: data.translation?.meaning || "A translation is not available right now.",
+          status: data.translation?.status,
+        },
       }));
     } catch {
-      setMeanings(prev => ({ ...prev, [verse.id]: "Unable to load the reviewed meaning right now." }));
+      setMeanings(prev => ({ ...prev, [verse.id]: { text: "Unable to load the meaning right now." } }));
     } finally {
       setLoadingMeaning(null);
     }
@@ -97,7 +102,7 @@ export default function Reader() {
       <section className="hero" style={{ paddingBottom: 24 }}>
         <div className="eyebrow">Bhagavad Gita • Full Reader</div>
         <h1>Read all 18 chapters.</h1>
-        <p>Explore the complete 700-verse collection. Sanskrit remains the source text; reviewed meanings appear only when available.</p>
+        <p>Explore the complete 700-verse collection. Sanskrit remains the source text; translations generated on demand are labelled until reviewed.</p>
       </section>
 
       <section className="card">
@@ -110,7 +115,7 @@ export default function Reader() {
           </label>
           <label>
             <span className="muted">Meaning </span>
-            <select value={language} onChange={e => { setLanguage(e.target.value); setMeanings({}); }} style={{ marginLeft: 6, padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}>
+            <select value={language} onChange={e => { setLanguage(e.target.value); setMeanings({}); setOpen(null); }} style={{ marginLeft: 6, padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", background: "white" }}>
               {languages.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
             </select>
           </label>
@@ -144,8 +149,10 @@ export default function Reader() {
             </div>
             {open === verse.id && (
               <div className="meaning" style={{ marginTop: 18 }}>
-                <strong>Reviewed meaning</strong><br />
-                {loadingMeaning === verse.id ? "Loading…" : meanings[verse.id]}
+                <strong>Meaning</strong><br />
+                {loadingMeaning === verse.id ? "Translating…" : meanings[verse.id]?.text}
+                {meanings[verse.id]?.status === "ai_generated_unverified" && <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>AI-translated · Not yet verified</p>}
+                {meanings[verse.id]?.status === "reviewed" && <p className="muted" style={{ marginTop: 8, fontSize: 12 }}>Reviewed translation</p>}
               </div>
             )}
           </article>

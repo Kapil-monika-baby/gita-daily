@@ -4,6 +4,19 @@ import { createClient } from "@/lib/supabase/client";
 
 type Verse={id:string;chapter:number;verse:number;sanskrit:string;transliteration:string};
 type Translation={language:string;meaning:string};
+
+const wisdomPath=[
+ {chapter:2,verse:14,title:"When life feels difficult",summary:"Pleasure and pain change. Practice patience without losing perspective."},
+ {chapter:2,verse:47,title:"Focus on what you can control",summary:"Give your best to the action; don't let the outcome become your only motive."},
+ {chapter:2,verse:48,title:"Stay steady in success and failure",summary:"Meet both outcomes with balance rather than being ruled by either."},
+ {chapter:3,verse:19,title:"Act without attachment",summary:"Keep doing what needs to be done, without clinging to the reward."},
+ {chapter:6,verse:5,title:"Become your own ally",summary:"Support your own growth instead of pulling yourself down."},
+ {chapter:6,verse:26,title:"Bring your mind back gently",summary:"Whenever attention wanders, return it patiently to your chosen focus."},
+ {chapter:12,verse:13,title:"Choose compassion",summary:"Cultivate goodwill and reduce hostility toward others."},
+ {chapter:12,verse:14,title:"Practice steadiness",summary:"Grow in contentment, self-restraint, and a steady inner commitment."},
+ {chapter:18,verse:46,title:"Find meaning in your work",summary:"The Gita connects sincere work with a larger spiritual purpose."},
+ {chapter:18,verse:66,title:"Explore surrender and trust",summary:"A profound teaching on refuge; read the verse with its wider context."},
+];
 const languages=[["en","English"],["hi","हिन्दी"],["mr","मराठी"],["gu","ગુજરાતી"],["bn","বাংলা"],["ta","தமிழ்"],["te","తెలుగు"],["kn","ಕನ್ನಡ"],["ml","മലയാളം"],["pa","ਪੰਜਾਬੀ"],["or","ଓଡ଼ିଆ"],["as","অসমীয়া"],["ur","اردو"],["ne","नेपाली"],["fr","Français"],["de","Deutsch"],["es","Español"],["pt","Português"],["it","Italiano"],["ru","Русский"],["ja","日本語"],["ko","한국어"],["zh","中文"],["ar","العربية"],["id","Bahasa Indonesia"],["th","ไทย"]];
 
 export default function Home(){
@@ -64,6 +77,21 @@ export default function Home(){
     <div className="actions"><a className="secondary" href="/admin/translations">Review translations</a><button className="secondary" onClick={signOut}>Sign out</button></div>
    </div> : <a className="secondary" href="/auth">Sign in</a>}
   </aside></section>
+
+  <section className="card" style={{ marginTop: 22 }}>
+   <div className="eyebrow">A guided starting point</div>
+   <h2 style={{ marginTop: 6 }}>Begin with timeless teachings.</h2>
+   <p className="muted" style={{ maxWidth: 720 }}>New to the Gita? Explore teachings on resilience, focus, compassion, and inner steadiness. The complete scripture remains available in the reader, in its original order.</p>
+   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 18 }}>
+    {wisdomPath.map(item => <article key={item.chapter+"."+item.verse} style={{ border: "1px solid #e7e2d8", borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="verse-meta"><span>Bhagavad Gita</span><span>{item.chapter}.{item.verse}</span></div>
+      <h3 style={{ margin: 0, fontSize: 17 }}>{item.title}</h3>
+      <p className="muted" style={{ margin: 0, lineHeight: 1.5 }}>{item.summary}</p>
+      <div style={{ marginTop: "auto", paddingTop: 8 }}><a className="secondary" href={`/reader?chapter=${item.chapter}&verse=${item.verse}`}>Read this verse →</a></div>
+    </article>)}
+   </div>
+  </section>
+
   <footer className="footer">Gita Daily uses a normalized 700-verse structure. Translations are generated in batches, validated, and approved before delivery.</footer>
  </main>
 }

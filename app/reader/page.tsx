@@ -38,6 +38,14 @@ export default function Reader() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedChapter = Number(params.get("chapter"));
+    if (Number.isInteger(requestedChapter) && requestedChapter >= 1 && requestedChapter <= 18) {
+      setChapter(requestedChapter);
+    }
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     setError("");
     setOpen(null);
@@ -50,6 +58,18 @@ export default function Reader() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [chapter]);
+
+
+  // Support links from the curated wisdom cards, e.g. /reader?chapter=2&verse=47.
+  useEffect(() => {
+    if (loading || verses.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedChapter = Number(params.get("chapter"));
+    const requestedVerse = Number(params.get("verse"));
+    if (!Number.isInteger(requestedChapter) || requestedChapter !== chapter) return;
+    if (!Number.isInteger(requestedVerse) || requestedVerse < 1) return;
+    document.getElementById("verse-" + requestedVerse)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [chapter, loading, verses]);
 
   const bookmarkSet = useMemo(() => new Set(bookmarks), [bookmarks]);
 

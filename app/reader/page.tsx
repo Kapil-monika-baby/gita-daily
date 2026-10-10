@@ -38,6 +38,14 @@ export default function Reader() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const requestedChapter = Number(params.get("chapter"));
+    if (Number.isInteger(requestedChapter) && requestedChapter >= 1 && requestedChapter <= 18) {
+      setChapter(requestedChapter);
+    }
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     setError("");
     setOpen(null);

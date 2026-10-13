@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const languages: [string,string][] = [
   ["hi","हिन्दी"],["mr","मराठी"],["gu","ગુજરાતી"],["bn","বাংলা"],["ta","தமிழ்"],["te","తెలుగు"],
@@ -17,6 +17,9 @@ export default function TranslationAdmin(){
   const [status,setStatus]=useState("pending");
   const [loading,setLoading]=useState(false);
   const [message,setMessage]=useState("");
+  const [importFile,setImportFile]=useState<File|null>(null);
+  const [importing,setImporting]=useState(false);
+  const [importMessage,setImportMessage]=useState("");
 
   async function load(){
     setLoading(true);setMessage("");
@@ -40,9 +43,41 @@ export default function TranslationAdmin(){
     if(index+1<rows.length)setIndex(index+1);else load();
   }
 
+  async function importWorkbook(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    if(!importFile || importing)return;
+    if(!window.confirm("Import 14,700 Google Translate entries as pending drafts? Existing approved translations will be preserved; pending/rejected drafts may be refreshed. Nothing from this file will be automatically approved."))return;
+    setImporting(true);setImportMessage("");
+    try{
+      const form=new FormData();
+      form.append("file",importFile);
+      const r=await fetch("/api/admin/translations/import",{method:"POST",body:form});
+      const x=await r.json();
+      if(!r.ok)throw new Error(x.error||"Import failed.");
+      setImportMessage(`Import complete. ${Number(x.imported_or_refreshed_as_pending).toLocaleString()} entries imported/refreshed as pending; ${Number(x.approved_entries_preserved).toLocaleString()} already-approved entries preserved. The new drafts are hidden from readers until approved.`);
+      setImportFile(null);
+      const input=document.getElementById("translation-import-file") as HTMLInputElement|null;
+      if(input)input.value="";
+      await load();
+    }catch(e){setImportMessage(e instanceof Error?e.message:"Import failed.");}
+    finally{setImporting(false);}
+  }
+
   return <main className="shell">
     <header className="topbar"><div className="brand">ॐ <span>Translation Review</span></div><a className="secondary" href="/">← Gita Daily</a></header>
     <section className="hero"><div className="eyebrow">Admin • Translation review</div><h1>Review machine translations.</h1><p>Approve, reject, or edit translations before they become visible to readers.</p></section>
+    <section className="card" style={{marginBottom:24}}>
+      <h2 style={{marginTop:0}}>Import your Google Translate workbook</h2>
+      <p className="muted">Choose the prepared <strong>Gita_Daily_Google_Translate_Import.csv</strong> file (700 verses × 21 languages). Imports are saved as pending drafts. Existing approved entries are preserved; no translation is auto-approved.</p>
+      <form onSubmit={importWorkbook}>
+        <div className="actions" style={{alignItems:"center",flexWrap:"wrap"}}>
+          <input id="translation-import-file" type="file" accept=".csv,text/csv" onChange={e=>setImportFile(e.target.files?.[0]??null)} required={!importFile} />
+          <button className="primary" type="submit" disabled={!importFile||importing}>{importing?"Importing…":"Import CSV as drafts"}</button>
+        </div>
+      </form>
+      {importMessage&&<div className="meaning" role="status" style={{marginTop:16,whiteSpace:"pre-wrap"}}>{importMessage}</div>}
+      <p className="footer">The importer validates all 14,700 verse/language pairs before writing, keeps Chapter 13 aligned to the app’s 34-verse numbering, and refuses incomplete or duplicate imports.</p>
+    </section>
     <section className="card">
       <div className="actions" style={{justifyContent:"space-between",flexWrap:"wrap"}}>
         <div><label className="muted">Language </label><select value={language} onChange={e=>setLanguage(e.target.value)} style={{marginLeft:8,padding:"10px 12px",borderRadius:10,border:"1px solid #ddd"}}>{languages.map(([c,n])=><option key={c} value={c}>{n}</option>)}</select></div>

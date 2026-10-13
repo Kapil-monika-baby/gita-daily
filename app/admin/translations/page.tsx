@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 const languages: [string,string][] = [
   ["hi","हिन्दी"],["mr","मराठी"],["gu","ગુજરાતી"],["bn","বাংলা"],["ta","தமிழ்"],["te","తెలుగు"],
@@ -43,7 +43,7 @@ export default function TranslationAdmin(){
     if(index+1<rows.length)setIndex(index+1);else load();
   }
 
-  async function importWorkbook(e:React.FormEvent<HTMLFormElement>){
+  async function importWorkbook(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(!importFile || importing)return;
     if(!window.confirm("Import 14,700 Google Translate entries as pending drafts? Existing approved translations will be preserved; pending/rejected drafts may be refreshed. Nothing from this file will be automatically approved."))return;

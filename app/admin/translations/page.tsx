@@ -46,7 +46,7 @@ export default function TranslationAdmin(){
   async function importWorkbook(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(!importFile || importing)return;
-    if(!window.confirm("Import 14,700 Google Translate entries as pending drafts? Existing approved translations will be preserved; pending/rejected drafts may be refreshed. Nothing from this file will be automatically approved."))return;
+    if(!window.confirm("Import 14,700 Google Translate entries as pending drafts? Human-reviewed approved translations will be preserved; pending/rejected drafts and legacy Argos machine translations may be refreshed as pending. Nothing from this file will be automatically approved."))return;
     setImporting(true);setImportMessage("");
     try{
       const form=new FormData();
@@ -68,7 +68,7 @@ export default function TranslationAdmin(){
     <section className="hero"><div className="eyebrow">Admin • Translation review</div><h1>Review machine translations.</h1><p>Approve, reject, or edit translations before they become visible to readers.</p></section>
     <section className="card" style={{marginBottom:24}}>
       <h2 style={{marginTop:0}}>Import your Google Translate workbook</h2>
-      <p className="muted">Choose the prepared <strong>Gita_Daily_Google_Translate_Import.csv</strong> file (700 verses × 21 languages). Imports are saved as pending drafts. Existing approved entries are preserved; no translation is auto-approved.</p>
+      <p className="muted">Choose the prepared <strong>Gita_Daily_Google_Translate_Import.csv</strong> file (700 verses × 21 languages). Imports are saved as pending drafts. Human-reviewed approved entries are preserved; legacy Argos machine translations may be replaced by pending workbook drafts.</p>
       <form onSubmit={importWorkbook}>
         <div className="actions" style={{alignItems:"center",flexWrap:"wrap"}}>
           <input id="translation-import-file" type="file" accept=".csv,text/csv" onChange={e=>setImportFile(e.target.files?.[0]??null)} required={!importFile} />

@@ -160,14 +160,18 @@ export async function POST(request: Request) {
     for (let from = 0; ; from += 1000) {
       const { data, error } = await gate.client
         .from("translations")
-        .select("verse_id,language")
+        .select("verse_id,language,model")
         .eq("review_status", "approved")
         .in("language", [...supportedLanguages])
         .order("verse_id")
         .order("language")
         .range(from, from + 999);
       if (error) throw new Error(error.message);
-      for (const row of data ?? []) approved.add(`${row.verse_id}:${row.language}`);
+      for (const row of data ?? []) {
+        // Earlier Argos-generated rows were machine translations, not human-reviewed approvals.
+        // Allow the Google Translate workbook to replace those as pending drafts for review.
+        if (row.model !== "argos-translate") approved.add(`${row.verse_id}:${row.language}`);
+      }
       if (!data || data.length < 1000) break;
     }
 

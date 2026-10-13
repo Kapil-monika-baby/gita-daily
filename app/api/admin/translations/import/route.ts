@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
+export const maxDuration = 60;
+
 const supportedLanguages = new Set([
   "hi", "bn", "mr", "gu", "ta", "te", "kn", "ml", "pa", "or",
   "es", "fr", "de", "pt", "ru", "ar", "zh", "ja", "id", "it", "ko",
@@ -161,6 +163,8 @@ export async function POST(request: Request) {
         .select("verse_id,language")
         .eq("review_status", "approved")
         .in("language", [...supportedLanguages])
+        .order("verse_id")
+        .order("language")
         .range(from, from + 999);
       if (error) throw new Error(error.message);
       for (const row of data ?? []) approved.add(`${row.verse_id}:${row.language}`);
@@ -169,8 +173,8 @@ export async function POST(request: Request) {
 
     const toWrite = mapped.filter(row => !approved.has(`${row.verse_id}:${row.language}`));
     let written = 0;
-    for (let i = 0; i < toWrite.length; i += 250) {
-      const batch = toWrite.slice(i, i + 250);
+    for (let i = 0; i < toWrite.length; i += 750) {
+      const batch = toWrite.slice(i, i + 750);
       const { error } = await gate.client
         .from("translations")
         .upsert(batch, { onConflict: "verse_id,language" });

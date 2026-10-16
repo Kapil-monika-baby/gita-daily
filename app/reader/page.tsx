@@ -25,7 +25,7 @@ export default function Reader() {
   const [verses, setVerses] = useState<Verse[]>([]);
   const [language, setLanguage] = useState("en");
   const [open, setOpen] = useState<string | null>(null);
-  const [meanings, setMeanings] = useState<Record<string, string>>({});
+  const [meanings, setMeanings] = useState<Record<string, { meaning: string; review_status?: string | null }>>({});
   const [loadingMeaning, setLoadingMeaning] = useState<string | null>(null);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,10 +98,12 @@ export default function Reader() {
       if (data.error) throw new Error(data.error);
       setMeanings(prev => ({
         ...prev,
-        [verse.id]: data.translation?.meaning || "A reviewed translation is not available for this language yet.",
+        [verse.id]: data.translation
+          ? { meaning: data.translation.meaning, review_status: data.translation.review_status }
+          : { meaning: "A translation is not available for this language yet.", review_status: null },
       }));
     } catch {
-      setMeanings(prev => ({ ...prev, [verse.id]: "Unable to load the reviewed meaning right now." }));
+      setMeanings(prev => ({ ...prev, [verse.id]: { meaning: "Unable to load the meaning right now.", review_status: null } }));
     } finally {
       setLoadingMeaning(null);
     }
@@ -164,8 +166,8 @@ export default function Reader() {
             </div>
             {open === verse.id && (
               <div className="meaning" style={{ marginTop: 18 }}>
-                <strong>Reviewed meaning</strong><br />
-                {loadingMeaning === verse.id ? "Loading…" : meanings[verse.id]}
+                <strong>{meanings[verse.id]?.review_status === "approved" ? "Reviewed meaning" : "Imported meaning · not yet reviewed"}</strong><br />
+                {loadingMeaning === verse.id ? "Loading…" : meanings[verse.id]?.meaning}
               </div>
             )}
           </article>

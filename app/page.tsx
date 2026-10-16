@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Verse={id:string;chapter:number;verse:number;sanskrit:string;transliteration:string};
-type Translation={language:string;meaning:string};
+type Translation={language:string;meaning:string;review_status?:string|null};
 
 const wisdomPath=[
  {chapter:2,verse:14,title:"When life feels difficult",summary:"Pleasure and pain change. Practice patience without losing perspective."},
@@ -63,7 +63,7 @@ export default function Home(){
    <select value={language} onChange={e=>setLanguage(e.target.value)} style={{marginTop:6,padding:"10px 12px",borderRadius:10,border:"1px solid #ddd",background:"white"}}>
     {languages.map(([code,name])=><option key={code} value={code}>{name}</option>)}
    </select>
-   {show&&<div className="meaning"><strong>Meaning</strong><br/>{loadingMeaning?"Loading cached meaning…":translation?.meaning??"A reviewed translation is not available for this language yet."}</div>}
+   {show&&<div className="meaning"><strong>{translation?.review_status === "approved" ? "Reviewed meaning" : "Imported meaning · not yet reviewed"}</strong><br/>{loadingMeaning?"Loading cached meaning…":translation?.meaning??"A translation is not available for this language yet."}</div>}
    <div className="actions"><button className="primary" onClick={()=>setShow(v=>!v)}>{show?"Hide meaning":"Reveal meaning"}</button><a className="secondary" href="/reader">Read all 700 verses</a></div>
    </>}
   </article>
